@@ -78,6 +78,9 @@
   function newBlock(rows) {
     const b = {}; SHARED_KEYS.forEach((k) => (b[k] = ""));
     b.rows = Array.from({ length: rows || 4 }, newRow);   // spreadsheet uses 4 cars/container
+    // Which shared columns are "split" into one box per car for THIS block
+    // (e.g. { color: true } when the container holds cars of mixed colors).
+    b.split = {};
     return b;
   }
   function newSection() {
@@ -107,6 +110,7 @@
         // Fournisseur used to live on the section (a header row); it is now a
         // merged block column, so carry the old value into each block.
         if (b.fournisseur == null) b.fournisseur = sec.fournisseur || "";
+        if (!b.split) b.split = {};
       }
       delete sec.fournisseur;
     }
@@ -150,12 +154,24 @@
     for (const col of allColumns()) {
       if (col.auto) {                                  // N° — auto 1..n within the block
         html += `<td class="c-num">${rIdx + 1}</td>`;
-      } else if (col.shared) {
-        // Shared columns only appear once per block (first row), spanning all rows.
+      } else if (col.shared && !block.split[col.key]) {
+        // Merged: one box for the whole block (first row spans all rows).
+        // The ⤢ button (screen only) splits it into one box per car.
         if (rIdx === 0) {
           html += `<td class="c-shared" rowspan="${blockLen}">` +
-                  cellInput(block[col.key], `data-shared="${col.key}"`, col.label) + `</td>`;
+                  cellInput(block[col.key], `data-shared="${col.key}"`, col.label) +
+                  `<button class="cell-toggle no-print" data-split="${col.key}" ` +
+                          `title="Split into one box per car" type="button">⤢</button>` +
+                  `</td>`;
         }
+      } else if (col.shared) {
+        // Split: this shared column shows a box per car for this block.
+        // The ⤡ button on the first row merges it back into one box.
+        const mergeBtn = rIdx === 0
+          ? `<button class="cell-toggle no-print" data-merge="${col.key}" ` +
+                    `title="Merge back into one box" type="button">⤡</button>`
+          : "";
+        html += `<td class="c-split">` + cellInput(row[col.key], `data-k="${col.key}"`, "") + mergeBtn + `</td>`;
       } else {
         html += `<td>` + cellInput(row[col.key], `data-k="${col.key}"`, "") + `</td>`;
       }
@@ -270,6 +286,27 @@
       state.customCols = state.customCols.filter((c) => c.id !== id);
       // Drop the column's stored values so saved sheets stay tidy.
       state.sections.forEach((s) => s.blocks.forEach((b) => b.rows.forEach((r) => delete r[id])));
+      render();
+      return;
+    }
+
+    // Split a merged cell into per-car boxes, or merge it back.
+    const splitBtn = e.target.closest("[data-split],[data-merge]");
+    if (splitBtn) {
+      const sec = state.sections[+splitBtn.closest(".sit-section").dataset.si];
+      const block = sec.blocks[+splitBtn.closest("tbody").dataset.bi];
+      if (splitBtn.dataset.split) {
+        const key = splitBtn.dataset.split;
+        // Carry the merged value into every car row so nothing is lost.
+        block.rows.forEach((r) => { if (!r[key]) r[key] = block[key]; });
+        block.split[key] = true;
+      } else {
+        const key = splitBtn.dataset.merge;
+        // Keep the first filled-in value as the merged value, drop the rest.
+        block[key] = block.rows.map((r) => r[key]).find((v) => v) || "";
+        block.rows.forEach((r) => { delete r[key]; });
+        block.split[key] = false;
+      }
       render();
       return;
     }
