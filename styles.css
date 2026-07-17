@@ -530,3 +530,64 @@ td:hover > .cell-toggle, .cell-toggle:focus-visible { opacity: 1; }
   thead { display: table-header-group; }
   tbody.sit-block { break-inside: avoid; page-break-inside: avoid; }
 }
+
+/* ============================================================================
+   MOBILE & TOUCH SUPPORT
+   ========================================================================== */
+
+/* ---------- Touch devices (any screen size) ---------- */
+@media (pointer: coarse) {
+  /* iOS Safari auto-zooms the page when a focused input's font is under
+     16px — keep every editable field at 16px so focusing never zooms. */
+  .sit-in, .range-input, .sheet-title-field input { font-size: 16px; }
+  .sit-table td { height: 30px; }
+  .sit-head th .cc-label { font-size: 14px; }
+
+  /* Hover-revealed controls don't exist on touch — keep them visible. */
+  .page-zoom, .cell-toggle { opacity: 1; }
+
+  /* Bigger touch targets for the tiny header/cell buttons. */
+  .cc-del { width: 22px; height: 22px; font-size: 12px; }
+  .cell-toggle { width: 24px; height: 24px; font-size: 13px; }
+
+  /* Smooth momentum scrolling for the wide sheet table. */
+  .sit-table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
+/* Long-press reorder needs the browser not to select/callout on hold. */
+.page-thumb { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.page-thumb.touch-lift { transform: scale(1.06); box-shadow: var(--shadow-lg); z-index: 5; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 740px) {
+  .container { padding: 0 14px; }
+
+  .hero { padding: 40px 0 28px; }
+  .subtitle { font-size: 16px; }
+  .dropzone { padding: 40px 16px; }
+  .dropzone-title { font-size: 19px; }
+
+  /* Toolbar: stack the two groups; range input takes the full row. */
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .range-group { width: 100%; }
+  .range-label { flex-basis: 100%; }
+  .range-input { flex: 1; width: auto; min-width: 0; }
+
+  .page-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
+
+  /* Sheet builder controls stack vertically. */
+  .sheet-controls { flex-direction: column; align-items: stretch; }
+  .sheet-control-btns { justify-content: stretch; }
+  .sheet-control-btns .btn { flex: 1; text-align: center; }
+  .sheet-doc { padding: 14px 10px; }
+  .sit-doc-title { font-size: 16px; }
+
+  /* Leave room for the taller stacked export bar. */
+  .workspace { padding-bottom: 230px; }
+}
+
+@media (max-width: 420px) {
+  .view-tab { padding: 7px 9px; font-size: 12px; }
+  .header-inner { gap: 6px; }
+  .hero h1 { font-size: 30px; }
+}
