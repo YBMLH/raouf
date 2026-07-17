@@ -1,55 +1,73 @@
-# 📄 PDF Toolkit
+# ✂️ Papercut — PDF Page Extractor
 
-A **free, privacy-first PDF toolkit** that runs entirely in your browser. No
-uploads, no backend, no database, no sign-up. Every file you open is processed
-locally on your device — nothing is ever sent to a server.
+A **professional, privacy-first PDF page extractor** that runs entirely in your
+browser. Upload a PDF, pick the pages you want, and download a clean new file.
+No backend, no database, no uploads — every file is processed locally on your
+device.
 
-Built to be deployed for **$0/month on GitHub Pages**.
+Built to deploy for **$0/month on GitHub Pages**.
 
-## ✨ Tools
+## ✨ Features
 
-| Tool | What it does |
-| --- | --- |
-| 🔗 **Merge** | Combine several PDFs into one (drag to reorder). |
-| ✂️ **Split** | Break a PDF into single pages, every N pages, or custom ranges → `.zip`. |
-| 📑 **Extract** | Pick pages from thumbnails and save them as a new PDF. |
-| 🗑️ **Delete** | Remove selected pages, keep the rest. |
-| 🔄 **Rotate** | Turn selected pages (or all) 90° at a time. |
-| 🗜️ **Compress** | Shrink file size by rasterizing pages (great for scanned PDFs). |
-| 🖼️ **PDF → Images** | Render each page to PNG/JPEG, downloaded as a `.zip`. |
-| 📸 **Images → PDF** | Turn JPG/PNG images into a single PDF (drag to reorder). |
+**Core**
+- 📤 **Upload** — drag-and-drop *or* file picker, PDF-only, shows name, size & page count (handles files up to 200 MB)
+- 🖼️ **Preview** — responsive thumbnail grid with clear page numbers and a 🔍 zoom preview modal
+- ✅ **Selection** — click pages to select/deselect, with highlighted borders + checkmarks, plus **Select all** / **Deselect all**
+- 🔢 **Range input** — type `1, 3, 5-10, 15` with full validation and friendly error messages
+- 📄 **Generation** — builds a new PDF of only the selected pages, preserving original quality, orientation & formatting
+- ⬇️ **Download** — one clean PDF, shows the resulting file size, and lets you keep extracting without refreshing
+
+**Bonus**
+- ↕️ **Drag-to-reorder** pages before exporting
+- 🌙 **Dark mode** toggle (remembers your choice)
+- ➕ **Merge** — append pages from another PDF
+- 🗑️ **Delete** selected pages
+- 📦 **Export as separate files** — one PDF per page, delivered as a `.zip`
+- ⏳ **Loading indicators** with progress bars
+
+## 🎨 Design
+
+Elegant **black · white · beige · cream** palette with a warm espresso accent,
+clean typography, smooth animations, and a responsive SaaS-style layout that
+works on mobile, tablet and desktop — in both light and dark mode.
 
 ## 🔒 Privacy
 
-All work happens client-side:
+Everything is client-side:
 
 ```
-User adds file → Browser reads it → You edit/select → pdf-lib builds output → You download
+Open PDF → Browser renders it → You select pages → pdf-lib builds output → You download
 ```
 
 Nothing leaves your computer. Refresh the page to clear everything.
 
-## 🧩 How it works
+## 📁 Project structure
 
-- [`pdf-lib`](https://pdf-lib.js.org/) — creating and manipulating PDFs
-- [`pdf.js`](https://mozilla.github.io/pdf.js/) — rendering page thumbnails & rasterizing
-- [`JSZip`](https://stuk.github.io/jszip/) — bundling multi-file downloads into a `.zip`
+```
+index.html      # markup / UI structure
+styles.css      # all styling + light/dark themes (CSS variables)
+script.js       # all app logic (well commented for beginners)
+lib/            # vendored libraries — no CDN, fully offline
+  pdf-lib.min.js
+  pdf.min.js
+  pdf.worker.min.js
+  jszip.min.js
+```
 
-All libraries are **vendored locally** in [`js/vendor/`](js/vendor) — no CDN, no
-third-party requests, works fully offline. Just static files: `index.html`,
-`css/`, and `js/`.
+Libraries used: [`pdf-lib`](https://pdf-lib.js.org/) (build PDFs),
+[`pdf.js`](https://mozilla.github.io/pdf.js/) (render thumbnails/preview) and
+[`JSZip`](https://stuk.github.io/jszip/) (zip the "separate files" download).
+All are **vendored locally** in `lib/`, so there are no third-party requests.
 
 ## 🚀 Deploy on GitHub Pages
 
-**Option A — GitHub Actions (recommended):**
-1. Push to `main`.
-2. Repo **Settings → Pages → Source: GitHub Actions**.
-3. The included [`deploy.yml`](.github/workflows/deploy.yml) workflow publishes automatically.
+**Option A — GitHub Actions (recommended):** push to `main`, then set
+**Settings → Pages → Source: GitHub Actions**. The included
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) publishes automatically.
 
-**Option B — Branch source:**
-1. Repo **Settings → Pages → Source: Deploy from a branch → `main` / root**.
+**Option B — Branch source:** **Settings → Pages → Source: Deploy from a branch → `main` / root**.
 
-The `.nojekyll` file ensures GitHub serves the files as-is.
+The `.nojekyll` file makes GitHub serve the files as-is.
 
 ## 🖥️ Run locally
 
@@ -57,11 +75,11 @@ No build step. Serve the folder with any static server:
 
 ```bash
 python3 -m http.server 8000
-# then open http://localhost:8000
+# open http://localhost:8000
 ```
 
-(Opening `index.html` directly via `file://` mostly works, but a local server
-avoids browser restrictions on the pdf.js web worker.)
+(A local server is recommended over opening `index.html` via `file://` because
+the pdf.js worker needs a normal `http(s)` origin.)
 
 ## 📄 License
 
