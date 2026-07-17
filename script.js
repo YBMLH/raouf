@@ -1,5 +1,5 @@
 /* ============================================================================
- * Papercut — PDF Page Extractor
+ * BKR Solution — PDF Page Extractor
  * script.js
  *
  * Everything runs in the browser. No servers, no uploads.

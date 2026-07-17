@@ -1,4 +1,4 @@
-# ✂️ Papercut — PDF Page Extractor
+# ✂️ BKR Solution — PDF & Situation Sheet Tools
 
 A **professional, privacy-first PDF page extractor** that runs entirely in your
 browser. Upload a PDF, pick the pages you want, and download a clean new file.

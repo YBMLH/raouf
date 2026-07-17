@@ -1,5 +1,5 @@
 /* ============================================================================
- * Papercut — Situation Sheet builder
+ * BKR Solution — Situation Sheet builder
  * sheet.js
  *
  * A second tool living in the same page: it recreates the "Cars in the Sea"
