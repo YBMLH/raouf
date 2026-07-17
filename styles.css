@@ -441,13 +441,21 @@ img, canvas { display: block; max-width: 100%; }
 .sit-title .sit-in { color: #fff; font-weight: 700; font-size: 16px; text-align: center; width: auto; min-width: 90px; }
 .sit-title .sit-in::placeholder { color: rgba(255,255,255,.65); font-weight: 500; }
 
-/* Fournisseur line (new field) */
-.sit-fourn th { background: #d9d9d9; color: #000; font-weight: 700; font-size: 13px; text-align: left; padding: 4px 10px; }
-.sit-fourn .fourn-label { margin-right: 6px; }
-.sit-fourn .sit-in { text-align: left; font-weight: 600; width: 60%; min-width: 200px; }
-
 /* Column header row (≈ Excel theme white, -25% tint) */
 .sit-head th { background: #bfbfbf; color: #000; font-weight: 700; font-size: 12px; padding: 4px 3px; }
+
+/* User-added column headers (editable label + remove ✕) */
+.c-custom-head { position: relative; }
+.cc-label { font-weight: 700; font-size: 12px; }
+.cc-label::placeholder { color: #8a8a8a; font-weight: 500; }
+.cc-del {
+  position: absolute; top: -7px; right: -7px; width: 17px; height: 17px;
+  border-radius: 50%; border: 1px solid var(--separator);
+  background: var(--surface); color: var(--red);
+  font-size: 10px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+  box-shadow: var(--shadow-sm);
+}
+.cc-del:hover { background: var(--red); border-color: var(--red); color: #fff; }
 
 /* Data cells */
 .sit-table td { font-weight: 600; font-size: 12px; height: 22px; }
@@ -500,10 +508,11 @@ img, canvas { display: block; max-width: 100%; }
   }
   .sit-table th, .sit-table td { padding: 1px 2px; word-break: break-word; }
   .sit-title th, .sit-title .sit-in { font-size: 11px; }
-  .sit-fourn th, .sit-fourn .sit-in { font-size: 9px; }
-  .sit-head th { font-size: 8px; }
+  .sit-head th, .cc-label { font-size: 8px; }
   .sit-table td { font-size: 8px; height: auto; }
   .sit-in { text-overflow: ellipsis; }
+  /* Don't print the greyed editing hints in cells left empty. */
+  .sit-in::placeholder { color: transparent; }
 
   /* Repeat the column headers on every printed page; keep containers intact. */
   thead { display: table-header-group; }

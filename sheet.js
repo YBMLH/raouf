@@ -42,11 +42,25 @@
     { key: "receipt",   label: "Receipt",               shared: false },
     { key: "notice",    label: "Payment notice Customs", shared: false },
     { key: "duty",      label: "Customs Duty Payment",  shared: false },
+    // Fournisseur: merged vertically per container block, on the right —
+    // one supplier value spanning the block's car rows (like Car/Seal).
+    { key: "fournisseur", label: "Fournisseur",         shared: true  },
   ];
-  const COLSPAN = COLUMNS.length;            // 14 — used by full-width rows
   const ROW_KEYS = COLUMNS.filter((c) => !c.shared && !c.auto).map((c) => c.key);
   const SHARED_KEYS = COLUMNS.filter((c) => c.shared).map((c) => c.key);
   const STORAGE_KEY = "papercut-sheet";
+
+  // Custom columns the user appends with "+ Add column". They live in
+  // state.customCols as { id, label } and stack on the RIGHT of the table.
+  // Their per-car values are stored on each row under the column's id.
+  let ccSeq = 0;
+  function newCustomCol() { return { id: "cc_" + Date.now() + "_" + (ccSeq++), label: "" }; }
+
+  // All columns currently shown = fixed ones + user-added ones.
+  function allColumns() {
+    return COLUMNS.concat(state.customCols.map((c) => ({ key: c.id, label: c.label, shared: false, custom: true })));
+  }
+  function colspan() { return allColumns().length; }
 
   /* ------------------------------------------------------------------ *
    * DOM references
@@ -67,10 +81,10 @@
     return b;
   }
   function newSection() {
-    return { carrier: "", port: "", date: "", fournisseur: "", blocks: [newBlock()] };
+    return { carrier: "", port: "", date: "", blocks: [newBlock()] };
   }
   function defaultState() {
-    return { title: "SITUATION CARS IN THE SEA", sections: [newSection()] };
+    return { title: "SITUATION CARS IN THE SEA", customCols: [], sections: [newSection()] };
   }
 
   let state = load() || defaultState();
@@ -80,9 +94,23 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      if (parsed && Array.isArray(parsed.sections)) return parsed;
+      if (parsed && Array.isArray(parsed.sections)) return migrate(parsed);
     } catch (e) { /* ignore corrupt/blocked storage */ }
     return null;
+  }
+
+  // Upgrade sheets saved by older versions of this page.
+  function migrate(s) {
+    if (!Array.isArray(s.customCols)) s.customCols = [];
+    for (const sec of s.sections) {
+      for (const b of sec.blocks || []) {
+        // Fournisseur used to live on the section (a header row); it is now a
+        // merged block column, so carry the old value into each block.
+        if (b.fournisseur == null) b.fournisseur = sec.fournisseur || "";
+      }
+      delete sec.fournisseur;
+    }
+    return s;
   }
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
@@ -105,14 +133,21 @@
   }
 
   // Build the <colgroup> so columns keep sensible proportions and print tidily.
-  const COL_WIDTHS = ["3%","15%","6%","6%","12%","9%","8%","7%","5%","6%","7%","5%","12%","12%"];
+  // Widths of the 15 fixed columns; custom columns then share the leftover
+  // space equally (the fixed ones are scaled down to make room).
+  const COL_WIDTHS = [3, 14, 5, 5, 11, 9, 8, 7, 5, 5, 6, 5, 10, 10, 7]; // ≈100
   function colgroup() {
-    return "<colgroup>" + COL_WIDTHS.map((w) => `<col style="width:${w}">`).join("") + "</colgroup>";
+    const custom = state.customCols.length;
+    const customW = 7;                                  // % per custom column
+    const scale = (100 - custom * customW) / 100;        // shrink fixed columns
+    const widths = COL_WIDTHS.map((w) => (w * scale).toFixed(2) + "%")
+      .concat(state.customCols.map(() => customW + "%"));
+    return "<colgroup>" + widths.map((w) => `<col style="width:${w}">`).join("") + "</colgroup>";
   }
 
   function renderRow(section, sIdx, block, bIdx, row, rIdx, blockLen) {
     let html = `<tr data-ri="${rIdx}">`;
-    for (const col of COLUMNS) {
+    for (const col of allColumns()) {
       if (col.auto) {                                  // N° — auto 1..n within the block
         html += `<td class="c-num">${rIdx + 1}</td>`;
       } else if (col.shared) {
@@ -135,7 +170,7 @@
     // Per-block control strip (hidden when printing). Spans the full width so
     // it never disturbs column alignment.
     const ctrl =
-      `<tr class="sit-block-ctrl no-print"><td colspan="${COLSPAN}">` +
+      `<tr class="sit-block-ctrl no-print"><td colspan="${colspan()}">` +
         `<button class="mini-btn" data-act="add-row">＋ Add car</button>` +
         `<button class="mini-btn" data-act="del-row">− Remove last car</button>` +
         `<button class="mini-btn danger" data-act="del-block">🗑 Remove container</button>` +
@@ -144,13 +179,22 @@
   }
 
   function renderSection(section, sIdx) {
+    // Header cells: fixed labels, then user-added columns whose label is an
+    // editable input with a small ✕ (screen only) to remove the column.
     const head =
       `<tr class="sit-head">` +
-        COLUMNS.map((c) => `<th>${esc(c.label)}</th>`).join("") +
+        allColumns().map((c) => {
+          if (!c.custom) return `<th>${esc(c.label)}</th>`;
+          return `<th class="c-custom-head">` +
+                   `<input class="sit-in cc-label" type="text" value="${esc(c.label)}" ` +
+                          `placeholder="Column" data-cchead="${c.key}" />` +
+                   `<button class="cc-del no-print" data-ccdel="${c.key}" title="Remove this column" type="button">✕</button>` +
+                 `</th>`;
+        }).join("") +
       `</tr>`;
 
     const titleRow =
-      `<tr class="sit-title"><th colspan="${COLSPAN}">` +
+      `<tr class="sit-title"><th colspan="${colspan()}">` +
         `<div class="sit-title-fields">` +
           cellInput(section.carrier, `data-field="carrier"`, "Line / Carrier") +
           `<span class="sep">·</span>` +
@@ -158,12 +202,6 @@
           `<span class="sep">·</span>` +
           cellInput(section.date, `data-field="date"`, "Date & time") +
         `</div>` +
-      `</th></tr>`;
-
-    const fournRow =
-      `<tr class="sit-fourn"><th colspan="${COLSPAN}">` +
-        `<span class="fourn-label">Fournisseur :</span>` +
-        cellInput(section.fournisseur, `data-field="fournisseur"`, "Supplier name") +
       `</th></tr>`;
 
     const bodies = section.blocks.map((b, bIdx) => renderBlock(section, sIdx, b, bIdx)).join("");
@@ -177,7 +215,7 @@
         `</div>` +
         `<div class="sit-table-wrap">` +
           `<table class="sit-table">` + colgroup() +
-            `<thead>${titleRow}${fournRow}${head}</thead>` +
+            `<thead>${titleRow}${head}</thead>` +
             bodies +
           `</table>` +
         `</div>` +
@@ -203,7 +241,14 @@
     const section = state.sections[+t.closest(".sit-section").dataset.si];
     if (!section) return;
 
-    if (t.dataset.field) {                       // section header / fournisseur
+    if (t.dataset.cchead) {                      // custom column header label
+      const cc = state.customCols.find((c) => c.id === t.dataset.cchead);
+      if (cc) cc.label = t.value;
+      // The same column header appears in every section — keep them in sync.
+      sheetDoc.querySelectorAll(`[data-cchead="${t.dataset.cchead}"]`).forEach((el) => {
+        if (el !== t) el.value = t.value;
+      });
+    } else if (t.dataset.field) {                // section header fields
       section[t.dataset.field] = t.value;
     } else if (t.dataset.shared) {               // shared block cell
       const bi = +t.closest("tbody").dataset.bi;
@@ -218,6 +263,17 @@
 
   // Structural actions (add/remove) via one delegated click handler.
   sheetDoc.addEventListener("click", (e) => {
+    // Remove a user-added column (the ✕ in its header) — affects all sections.
+    const del = e.target.closest("[data-ccdel]");
+    if (del) {
+      const id = del.dataset.ccdel;
+      state.customCols = state.customCols.filter((c) => c.id !== id);
+      // Drop the column's stored values so saved sheets stay tidy.
+      state.sections.forEach((s) => s.blocks.forEach((b) => b.rows.forEach((r) => delete r[id])));
+      render();
+      return;
+    }
+
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
     const sectionEl = btn.closest(".sit-section");
@@ -267,6 +323,15 @@
   });
 
   addSectionBtn.addEventListener("click", () => { state.sections.push(newSection()); render(); });
+
+  // "+ Add column" — appends a new empty column on the RIGHT of every table.
+  document.getElementById("addColumnBtn").addEventListener("click", () => {
+    state.customCols.push(newCustomCol());
+    render();
+    // Focus the new column's header so the user can name it right away.
+    const inputs = sheetDoc.querySelectorAll(".cc-label");
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
 
   clearSheetBtn.addEventListener("click", () => {
     if (!confirm("Clear the whole sheet and start fresh? This can't be undone.")) return;
