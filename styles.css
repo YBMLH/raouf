@@ -362,3 +362,150 @@ img, canvas { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ============================================================================
+   VIEW TABS (header segmented control) + view panels
+   ========================================================================== */
+.view-tabs {
+  display: inline-flex; gap: 3px; padding: 3px;
+  background: var(--fill); border-radius: var(--pill);
+}
+.view-tab {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 13.5px; font-weight: 500; color: var(--label-2);
+  padding: 7px 16px; border-radius: var(--pill);
+  transition: background .22s var(--ease), color .22s var(--ease);
+}
+.view-tab.is-active { background: var(--surface); color: var(--label); box-shadow: var(--shadow-sm); }
+.view-tab:hover:not(.is-active) { color: var(--label); }
+.view-panel[hidden] { display: none; }
+@media (max-width: 620px) {
+  .view-tab { padding: 7px 11px; font-size: 12.5px; }
+  .brand-name { display: none; }
+}
+
+/* ============================================================================
+   SITUATION SHEET BUILDER
+   ========================================================================== */
+.sheet-intro { text-align: center; padding: 48px 0 26px; }
+.sheet-intro h1 { font-weight: 600; font-size: clamp(28px, 5vw, 44px); letter-spacing: -0.03em; margin: 0 0 14px; }
+.sheet-intro h1 span {
+  background: linear-gradient(90deg, #0071e3, #42a5ff);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--accent);
+}
+:root[data-theme="dark"] .sheet-intro h1 span { background: linear-gradient(90deg, #0a84ff, #6cb6ff); -webkit-background-clip: text; background-clip: text; }
+
+.sheet-controls {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 22px;
+}
+.sheet-title-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 240px; }
+.sheet-title-field span { font-size: 13px; font-weight: 500; color: var(--label-2); }
+.sheet-title-field input {
+  padding: 10px 14px; font-size: 15px; font-weight: 600; font-family: inherit; color: var(--label);
+  border: 1px solid var(--separator); border-radius: var(--radius-sm); background: var(--surface);
+}
+.sheet-title-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.sheet-control-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* The printable "paper" — always light so it looks like the spreadsheet,
+   even when the app is in dark mode. */
+.sheet-doc {
+  background: #ffffff; color: #111; border-radius: var(--radius);
+  padding: 26px 22px; box-shadow: var(--shadow-md); border: 1px solid var(--separator-2);
+  overflow: hidden;
+}
+.sit-doc-title {
+  text-align: center; font-weight: 700; font-size: 20px; letter-spacing: .01em;
+  color: #111; margin: 4px 0 22px; text-transform: uppercase;
+}
+
+.sit-section { margin-bottom: 30px; }
+.sit-section-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.sit-section-tag { font-size: 12px; font-weight: 600; color: var(--label-3); margin-right: auto; }
+
+.sit-table-wrap { overflow-x: auto; }
+
+/* Calibri-like grid that mirrors the Excel styling exactly. */
+.sit-table {
+  border-collapse: collapse; width: 100%; min-width: 900px;
+  font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+  color: #000; background: #fff;
+}
+.sit-table th, .sit-table td { border: 1px solid #000; padding: 2px 4px; text-align: center; vertical-align: middle; }
+
+/* Grey section title bar (≈ Excel theme white, -50% tint) */
+.sit-title th { background: #808080; color: #fff; font-weight: 700; font-size: 16px; padding: 5px; }
+.sit-title-fields { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.sit-title-fields .sep { color: rgba(255,255,255,.7); }
+.sit-title .sit-in { color: #fff; font-weight: 700; font-size: 16px; text-align: center; width: auto; min-width: 90px; }
+.sit-title .sit-in::placeholder { color: rgba(255,255,255,.65); font-weight: 500; }
+
+/* Fournisseur line (new field) */
+.sit-fourn th { background: #d9d9d9; color: #000; font-weight: 700; font-size: 13px; text-align: left; padding: 4px 10px; }
+.sit-fourn .fourn-label { margin-right: 6px; }
+.sit-fourn .sit-in { text-align: left; font-weight: 600; width: 60%; min-width: 200px; }
+
+/* Column header row (≈ Excel theme white, -25% tint) */
+.sit-head th { background: #bfbfbf; color: #000; font-weight: 700; font-size: 12px; padding: 4px 3px; }
+
+/* Data cells */
+.sit-table td { font-weight: 600; font-size: 12px; height: 22px; }
+.sit-table td.c-num { font-weight: 700; width: 30px; }
+.sit-table td.c-shared { background: #fafafa; }
+
+/* Borderless in-cell inputs (so cells read like plain spreadsheet values) */
+.sit-in {
+  width: 100%; border: none; background: transparent; font: inherit; color: inherit;
+  text-align: center; padding: 1px 2px; min-width: 0;
+}
+.sit-in:focus { outline: none; background: #d7ecff; border-radius: 2px; }
+.sit-in::placeholder { color: #b0b0b0; font-weight: 400; }
+
+/* Small control buttons (never printed) */
+.mini-btn {
+  border: 1px solid var(--separator); background: var(--surface); color: var(--label);
+  border-radius: 8px; padding: 5px 11px; font-size: 12.5px; font-weight: 500; cursor: pointer;
+  transition: background .18s var(--ease), border-color .18s var(--ease);
+}
+.mini-btn:hover { background: var(--fill); }
+.mini-btn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 30%, transparent); }
+.mini-btn.danger:hover { background: color-mix(in srgb, var(--red) 10%, transparent); }
+.sit-block-ctrl td { border: none !important; text-align: left; padding: 5px 0 12px; background: transparent; }
+.sit-block-ctrl .mini-btn { margin-right: 6px; }
+
+/* ============================================================================
+   PRINT — render the situation sheet exactly like the spreadsheet
+   ========================================================================== */
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+
+  /* Hide everything except the printable sheet. */
+  .site-header, .site-footer, .sheet-intro, .sheet-controls, .no-print,
+  #view-extract, #previewModal, #loadingOverlay, #toast { display: none !important; }
+
+  body { background: #fff; }
+  .container { max-width: none; padding: 0; }
+  #view-sheet { display: block !important; }
+
+  .sheet-doc { box-shadow: none; border: none; border-radius: 0; padding: 0; }
+  .sit-doc-title { margin: 0 0 8px; font-size: 15px; }
+  .sit-section { margin-bottom: 12px; }
+  .sit-table-wrap { overflow: visible; }
+
+  /* Fit all 14 columns onto the landscape page. */
+  .sit-table {
+    table-layout: fixed; width: 100%; min-width: 0; font-size: 8px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .sit-table th, .sit-table td { padding: 1px 2px; word-break: break-word; }
+  .sit-title th, .sit-title .sit-in { font-size: 11px; }
+  .sit-fourn th, .sit-fourn .sit-in { font-size: 9px; }
+  .sit-head th { font-size: 8px; }
+  .sit-table td { font-size: 8px; height: auto; }
+  .sit-in { text-overflow: ellipsis; }
+
+  /* Repeat the column headers on every printed page; keep containers intact. */
+  thead { display: table-header-group; }
+  tbody.sit-block { break-inside: avoid; page-break-inside: avoid; }
+}

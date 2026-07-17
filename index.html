@@ -23,6 +23,12 @@
         <span class="brand-name">Paper<strong>cut</strong></span>
       </div>
 
+      <!-- View switcher: PDF extractor vs. Situation Sheet builder -->
+      <nav class="view-tabs" role="tablist" aria-label="Choose a tool">
+        <button class="view-tab is-active" data-view="extract" role="tab" type="button">Extract PDF</button>
+        <button class="view-tab" data-view="sheet" role="tab" type="button">Situation Sheet</button>
+      </nav>
+
       <div class="header-actions">
         <span class="privacy-pill" title="Files are processed on your device only">
           <span class="pip" aria-hidden="true"></span> Private · in-browser
@@ -36,6 +42,11 @@
   </header>
 
   <main class="container">
+
+   <!-- ==============================================================
+        VIEW 1 — PDF PAGE EXTRACTOR
+        ============================================================== -->
+   <div id="view-extract" class="view-panel">
 
     <!-- ============================================================
          HERO + UPLOAD
@@ -132,6 +143,40 @@
         </div>
       </div>
     </section>
+   </div><!-- /view-extract -->
+
+   <!-- ==============================================================
+        VIEW 2 — SITUATION SHEET BUILDER
+        Recreate the "Cars in the Sea" sheet, fill it in, and print it
+        exactly (or Save as PDF from the print dialog).
+        ============================================================== -->
+   <div id="view-sheet" class="view-panel" hidden>
+
+     <section class="sheet-intro">
+       <h1>Situation&nbsp;Sheet <span>builder</span></h1>
+       <p class="subtitle">
+         Build your cars-in-the-sea situation sheet, fill in every field, then
+         print it exactly — or Save&nbsp;as&nbsp;PDF straight from the print dialog.
+         Your data stays in this browser.
+       </p>
+     </section>
+
+     <!-- Document-level controls -->
+     <div class="sheet-controls no-print">
+       <label class="sheet-title-field">
+         <span>Document title</span>
+         <input id="docTitle" type="text" value="SITUATION CARS IN THE SEA" />
+       </label>
+       <div class="sheet-control-btns">
+         <button id="addSectionBtn" class="btn btn-outline btn-sm" type="button">＋ Add section</button>
+         <button id="clearSheetBtn" class="btn btn-ghost btn-sm" type="button">Clear all</button>
+         <button id="printSheetBtn" class="btn btn-primary btn-sm" type="button">🖨 Print / Save PDF</button>
+       </div>
+     </div>
+
+     <!-- The printable document is rendered here by sheet.js -->
+     <div id="sheetDoc" class="sheet-doc"></div>
+   </div><!-- /view-sheet -->
   </main>
 
   <!-- ============================================================
@@ -181,5 +226,6 @@
   <script src="lib/pdf.min.js"></script>
   <script src="lib/jszip.min.js"></script>
   <script src="script.js"></script>
+  <script src="sheet.js"></script>
 </body>
 </html>
