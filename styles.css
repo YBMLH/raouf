@@ -591,3 +591,56 @@ td:hover > .cell-toggle, .cell-toggle:focus-visible { opacity: 1; }
   .header-inner { gap: 6px; }
   .hero h1 { font-size: 30px; }
 }
+
+/* ============================================================================
+   LIVE SHARED WORKSPACE PANEL
+   ========================================================================== */
+.share-panel {
+  background: var(--surface); border: 1px solid var(--separator-2);
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.share-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.share-ico { font-size: 24px; }
+.share-title { margin: 0; font-weight: 600; font-size: 15px; }
+.share-sub { margin: 2px 0 0; font-size: 13px; color: var(--label-2); }
+
+.share-steps { margin: 10px 0; padding-left: 22px; font-size: 13.5px; color: var(--label); }
+.share-steps li { margin: 5px 0; }
+.share-steps em { font-style: normal; font-weight: 600; }
+
+.share-rules {
+  background: var(--surface-2); border: 1px solid var(--separator-2);
+  border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11.5px;
+  overflow-x: auto; margin: 8px 0; user-select: all;
+}
+.share-config {
+  width: 100%; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px;
+  border: 1px solid var(--separator); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--label); padding: 10px 12px; resize: vertical;
+}
+.share-config:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+
+.share-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.share-or { color: var(--label-3); font-size: 13px; }
+.share-right { margin-left: auto; }
+.share-code-input {
+  width: 140px; padding: 8px 12px; font-size: 15px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; text-align: center;
+  font-family: ui-monospace, Menlo, monospace;
+  border: 1px solid var(--separator); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--label);
+}
+.share-code-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.share-msg { font-size: 13px; color: var(--label-2); }
+.share-msg.err { color: var(--red); font-weight: 500; }
+
+.share-live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--label-3); }
+.share-live-dot.ok { background: var(--green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 25%, transparent); }
+.share-live-dot.err { background: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 25%, transparent); }
+#wsCodeLabel { font-family: ui-monospace, Menlo, monospace; letter-spacing: .1em; }
+
+@media (max-width: 740px) {
+  .share-row { gap: 8px; }
+  .share-code-input { flex: 1; min-width: 120px; }
+}

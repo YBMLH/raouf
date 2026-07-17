@@ -161,6 +161,84 @@
        </p>
      </section>
 
+     <!-- ========== LIVE SHARED WORKSPACE (Firebase) ========== -->
+     <div id="sharePanel" class="share-panel no-print">
+
+       <!-- State A: Firebase not configured yet — one-time setup -->
+       <div id="shareSetup" hidden>
+         <div class="share-head">
+           <span class="share-ico" aria-hidden="true">👥</span>
+           <div>
+             <p class="share-title">Live sharing — one-time setup</p>
+             <p class="share-sub">Work on the same sheet with someone else, live, from any phone.
+                Needs a free Firebase account (~5 min, no credit card).</p>
+           </div>
+         </div>
+         <ol class="share-steps">
+           <li>Go to <strong>console.firebase.google.com</strong> → <em>Add project</em> (any name, Analytics off).</li>
+           <li>In the project: <em>Build → Firestore Database → Create database</em> → production mode → pick a location.</li>
+           <li>Open the <em>Rules</em> tab, replace everything with the rules below, and press <em>Publish</em>:</li>
+         </ol>
+         <pre class="share-rules" id="rulesText">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /workspaces/{code} {
+      allow read, write: if true;
+    }
+  }
+}</pre>
+         <ol class="share-steps" start="4">
+           <li><em>Project settings (⚙) → Your apps → Web (&lt;/&gt;)</em> → register an app → copy the whole
+               <code>firebaseConfig = { … }</code> block.</li>
+           <li>Paste it here:</li>
+         </ol>
+         <textarea id="fbConfigInput" class="share-config" rows="5"
+                   placeholder='const firebaseConfig = {
+  apiKey: "AIza…",
+  authDomain: "yourapp.firebaseapp.com",
+  projectId: "yourapp",
+  …
+};'></textarea>
+         <div class="share-row">
+           <button id="fbConfigSaveBtn" class="btn btn-primary btn-sm" type="button">Save &amp; enable sharing</button>
+           <span id="shareSetupMsg" class="share-msg"></span>
+         </div>
+       </div>
+
+       <!-- State B: configured, not in a workspace -->
+       <div id="shareIdle" hidden>
+         <div class="share-head">
+           <span class="share-ico" aria-hidden="true">👥</span>
+           <div>
+             <p class="share-title">Shared workspace</p>
+             <p class="share-sub">Create a workspace and give the code to your friend — or join theirs.
+                Everyone in it sees the same sheet, live.</p>
+           </div>
+         </div>
+         <div class="share-row">
+           <button id="wsCreateBtn" class="btn btn-primary btn-sm" type="button">Create workspace</button>
+           <span class="share-or">or</span>
+           <input id="wsJoinInput" class="share-code-input" type="text" placeholder="ENTER CODE"
+                  autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="10" />
+           <button id="wsJoinBtn" class="btn btn-outline btn-sm" type="button">Join</button>
+           <span id="shareIdleMsg" class="share-msg"></span>
+           <button id="fbReconfigBtn" class="btn btn-ghost btn-sm share-right" type="button" title="Change the Firebase configuration">⚙</button>
+         </div>
+       </div>
+
+       <!-- State C: connected to a workspace -->
+       <div id="shareLive" hidden>
+         <div class="share-row">
+           <span class="share-live-dot" id="shareDot" aria-hidden="true"></span>
+           <span class="share-title">Workspace <strong id="wsCodeLabel">——</strong></span>
+           <span id="shareStatus" class="share-msg">Connecting…</span>
+           <span class="share-right"></span>
+           <button id="wsCopyBtn" class="btn btn-outline btn-sm" type="button">Copy code</button>
+           <button id="wsLeaveBtn" class="btn btn-ghost btn-sm" type="button">Leave</button>
+         </div>
+       </div>
+     </div>
+
      <!-- Document-level controls -->
      <div class="sheet-controls no-print">
        <label class="sheet-title-field">
@@ -226,7 +304,11 @@
   <script src="lib/pdf-lib.min.js"></script>
   <script src="lib/pdf.min.js"></script>
   <script src="lib/jszip.min.js"></script>
+  <!-- Firebase (compat builds, vendored) — powers the live shared workspace -->
+  <script src="lib/firebase-app-compat.js"></script>
+  <script src="lib/firebase-firestore-compat.js"></script>
   <script src="script.js"></script>
   <script src="sheet.js"></script>
+  <script src="share.js"></script>
 </body>
 </html>

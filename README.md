@@ -7,6 +7,12 @@ device.
 
 Built to deploy for **$0/month on GitHub Pages**.
 
+Includes an optional **live shared workspace** for the Situation Sheet: create
+a workspace, send the 8-character code to a teammate, and you both edit the
+same sheet in real time from any device. Powered by a free Firebase Firestore
+project that you create once and paste the config into the app (guided,
+in-app). Without it, the app stays 100% local.
+
 ## ✨ Features
 
 **Core**

@@ -118,6 +118,10 @@
   }
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    // Tell the live-sharing layer (share.js) that the sheet changed locally.
+    if (window.BKRSheet && typeof window.BKRSheet.onLocalChange === "function") {
+      window.BKRSheet.onLocalChange(state);
+    }
   }
 
   /* ------------------------------------------------------------------ *
@@ -397,6 +401,27 @@
     window.scrollTo({ top: 0 });
   }
   tabs.forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
+
+  /* ------------------------------------------------------------------ *
+   * Public interface for the live-sharing layer (share.js)
+   * ------------------------------------------------------------------ */
+  window.BKRSheet = {
+    // Current sheet state (read-only use).
+    get: () => state,
+    // Replace the sheet with data that arrived from the shared workspace.
+    // skipBroadcast stops save() from echoing it straight back out.
+    applyRemote(remote) {
+      try {
+        state = migrate(JSON.parse(JSON.stringify(remote)));
+        window.BKRSheet._applying = true;
+        render();
+      } finally {
+        window.BKRSheet._applying = false;
+      }
+    },
+    _applying: false,
+    onLocalChange: null,   // share.js assigns a function here
+  };
 
   /* ------------------------------------------------------------------ *
    * Init
