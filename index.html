@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Papercut — PDF Page Extractor</title>
+  <meta name="description" content="Extract, reorder, merge and delete PDF pages entirely in your browser. Private, fast, no uploads." />
+
+  <!-- Google-free system font stack is used in CSS, so no external font requests. -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Emoji favicon (inline SVG, no external file needed) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✂️</span>
+        <span class="brand-name">Paper<strong>cut</strong></span>
+      </div>
+
+      <div class="header-actions">
+        <span class="privacy-pill" title="Files are processed on your device only">
+          <span class="pip" aria-hidden="true"></span> Private · in-browser
+        </span>
+        <!-- Dark mode toggle (bonus feature) -->
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ============================================================
+         HERO + UPLOAD
+         ============================================================ -->
+    <section class="hero">
+      <h1>Extract the pages you need.<br><span>Nothing you don't.</span></h1>
+      <p class="subtitle">
+        Drop a PDF, pick your pages, and download a clean new file. Everything
+        happens in your browser — your documents never leave your device.
+      </p>
+    </section>
+
+    <!-- Drag-and-drop upload area -->
+    <section id="uploadSection" class="upload-section">
+      <div id="dropzone" class="dropzone" tabindex="0" role="button"
+           aria-label="Upload a PDF file">
+        <div class="dropzone-content">
+          <div class="dropzone-icon" aria-hidden="true">📄</div>
+          <p class="dropzone-title">Drag &amp; drop your PDF here</p>
+          <p class="dropzone-or">or</p>
+          <button id="browseBtn" class="btn btn-primary" type="button">Choose a file</button>
+          <p class="dropzone-hint">PDF files only · up to 200&nbsp;MB · stays on your device</p>
+        </div>
+        <!-- Hidden native file input, triggered by the button / dropzone -->
+        <input id="fileInput" type="file" accept="application/pdf,.pdf" hidden />
+      </div>
+
+      <!-- Inline error / info messages for the upload step -->
+      <p id="uploadError" class="message message-error" role="alert" hidden></p>
+    </section>
+
+    <!-- ============================================================
+         WORKSPACE (hidden until a PDF is loaded)
+         ============================================================ -->
+    <section id="workspace" class="workspace" hidden>
+
+      <!-- File info card -->
+      <div class="file-card">
+        <div class="file-card-icon" aria-hidden="true">📕</div>
+        <div class="file-card-meta">
+          <p id="fileName" class="file-name">document.pdf</p>
+          <p class="file-sub">
+            <span id="fileSize">0 KB</span> ·
+            <span id="pageCount">0 pages</span> ·
+            <span id="selectedCount">0 selected</span>
+          </p>
+        </div>
+        <button id="addPdfBtn" class="btn btn-ghost btn-sm" type="button" title="Merge another PDF into this one">
+          ＋ Add / Merge PDF
+        </button>
+        <button id="closeFileBtn" class="btn btn-ghost btn-sm" type="button" title="Start over with a new file">
+          ✕ Close
+        </button>
+      </div>
+
+      <!-- Toolbar: selection + range input -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button id="selectAllBtn" class="btn btn-outline btn-sm" type="button">Select all</button>
+          <button id="deselectAllBtn" class="btn btn-outline btn-sm" type="button">Deselect all</button>
+          <button id="deleteSelectedBtn" class="btn btn-outline btn-sm btn-danger" type="button" title="Remove selected pages from this document">
+            🗑 Delete selected
+          </button>
+        </div>
+
+        <div class="toolbar-group range-group">
+          <label for="rangeInput" class="range-label">Select by range</label>
+          <input id="rangeInput" class="range-input" type="text"
+                 placeholder="e.g. 1, 3, 5-10, 15" autocomplete="off" />
+          <button id="applyRangeBtn" class="btn btn-outline btn-sm" type="button">Apply</button>
+        </div>
+      </div>
+      <!-- Range validation message -->
+      <p id="rangeError" class="message message-error" role="alert" hidden></p>
+
+      <p class="hint reorder-hint">💡 Tip: drag any page to reorder. Click a page to select it, or use the 🔍 to preview.</p>
+
+      <!-- Thumbnail grid -->
+      <div id="pageGrid" class="page-grid" aria-label="PDF pages"></div>
+
+      <!-- Sticky action bar for exporting -->
+      <div class="export-bar">
+        <div class="export-info">
+          <span id="exportSummary">0 pages selected</span>
+        </div>
+        <div class="export-actions">
+          <button id="exportIndividualBtn" class="btn btn-ghost" type="button"
+                  title="Download each selected page as its own PDF (zipped)">
+            Export as separate files
+          </button>
+          <button id="extractBtn" class="btn btn-primary" type="button" disabled>
+            Extract &amp; download PDF
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       ZOOM PREVIEW MODAL
+       ============================================================ -->
+  <div id="previewModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-body" role="dialog" aria-modal="true" aria-label="Page preview">
+      <button class="modal-close" data-close aria-label="Close preview">✕</button>
+      <div class="modal-nav">
+        <button id="prevPageBtn" class="btn btn-ghost btn-sm" type="button">‹ Prev</button>
+        <span id="previewLabel">Page 1</span>
+        <button id="nextPageBtn" class="btn btn-ghost btn-sm" type="button">Next ›</button>
+      </div>
+      <div id="previewCanvasWrap" class="preview-canvas-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       LOADING OVERLAY (shown during heavy processing)
+       ============================================================ -->
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="loading-box">
+      <div class="spinner-lg" aria-hidden="true"></div>
+      <p id="loadingText">Working…</p>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast" class="toast" hidden></div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Papercut · A private, in-browser PDF page extractor.</p>
+      <p class="muted">Powered by pdf-lib &amp; pdf.js · No servers, no tracking, no uploads.</p>
+    </div>
+  </footer>
+
+  <!-- Hidden file input used by the "Add / Merge PDF" button -->
+  <input id="mergeInput" type="file" accept="application/pdf,.pdf" hidden />
+
+  <!-- ============================================================
+       LIBRARIES (vendored locally — fully offline, no CDN)
+       ============================================================ -->
+  <script src="lib/pdf-lib.min.js"></script>
+  <script src="lib/pdf.min.js"></script>
+  <script src="lib/jszip.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
