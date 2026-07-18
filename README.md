@@ -9,9 +9,10 @@ Built to deploy for **$0/month on GitHub Pages**.
 
 Includes an optional **live shared workspace** for the Situation Sheet: create
 a workspace, send the 8-character code to a teammate, and you both edit the
-same sheet in real time from any device. Powered by a free Firebase Firestore
-project that you create once and paste the config into the app (guided,
-in-app). Without it, the app stays 100% local.
+same sheet in real time from any device. Powered by a free Supabase project
+(Postgres + Realtime, no credit card required) that you create once and
+connect from the app (guided, in-app — one SQL snippet to run, two values to
+paste). Without it, the app stays 100% local.
 
 ## ✨ Features
 

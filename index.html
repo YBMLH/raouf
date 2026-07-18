@@ -161,46 +161,46 @@
        </p>
      </section>
 
-     <!-- ========== LIVE SHARED WORKSPACE (Firebase) ========== -->
+     <!-- ========== LIVE SHARED WORKSPACE (Supabase) ========== -->
      <div id="sharePanel" class="share-panel no-print">
 
-       <!-- State A: Firebase not configured yet — one-time setup -->
+       <!-- State A: Supabase not configured yet — one-time setup -->
        <div id="shareSetup" hidden>
          <div class="share-head">
            <span class="share-ico" aria-hidden="true">👥</span>
            <div>
              <p class="share-title">Live sharing — one-time setup</p>
              <p class="share-sub">Work on the same sheet with someone else, live, from any phone.
-                Needs a free Firebase account (~5 min, no credit card).</p>
+                Needs a free Supabase account (~5 min, email or GitHub login only — no credit card).</p>
            </div>
          </div>
          <ol class="share-steps">
-           <li>Go to <strong>console.firebase.google.com</strong> → <em>Add project</em> (any name, Analytics off).</li>
-           <li>In the project: <em>Build → Firestore Database → Create database</em> → production mode → pick a location.</li>
-           <li>Open the <em>Rules</em> tab, replace everything with the rules below, and press <em>Publish</em>:</li>
+           <li>Go to <strong>supabase.com</strong> → <em>Start your project</em> → sign in → <em>New project</em>
+               (any name, set a database password, pick a region) → wait ~2 min for it to provision.</li>
+           <li>Open the <em>SQL Editor</em> (left sidebar) → <em>New query</em> → paste the SQL below → <em>Run</em>:</li>
          </ol>
-         <pre class="share-rules" id="rulesText">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /workspaces/{code} {
-      allow read, write: if true;
-    }
-  }
-}</pre>
-         <ol class="share-steps" start="4">
-           <li><em>Project settings (⚙) → Your apps → Web (&lt;/&gt;)</em> → register an app → copy the whole
-               <code>firebaseConfig = { … }</code> block.</li>
-           <li>Paste it here:</li>
+         <pre class="share-rules" id="rulesText">create table if not exists public.workspaces (
+  code text primary key,
+  json text not null,
+  client text,
+  updated_at timestamptz default now()
+);
+
+alter table public.workspaces enable row level security;
+
+create policy "allow all" on public.workspaces
+  for all using (true) with check (true);
+
+alter publication supabase_realtime add table public.workspaces;</pre>
+         <ol class="share-steps" start="3">
+           <li><em>Project settings (⚙) → API</em> → copy the <strong>Project URL</strong> and the
+               <strong>anon public</strong> key (not the secret one).</li>
+           <li>Paste them here:</li>
          </ol>
-         <textarea id="fbConfigInput" class="share-config" rows="5"
-                   placeholder='const firebaseConfig = {
-  apiKey: "AIza…",
-  authDomain: "yourapp.firebaseapp.com",
-  projectId: "yourapp",
-  …
-};'></textarea>
+         <input id="sbUrlInput" class="share-config share-config-input" type="text" placeholder="Project URL — https://xxxxx.supabase.co" />
+         <input id="sbKeyInput" class="share-config share-config-input" type="text" placeholder="anon public key — eyJhbGciOi…" />
          <div class="share-row">
-           <button id="fbConfigSaveBtn" class="btn btn-primary btn-sm" type="button">Save &amp; enable sharing</button>
+           <button id="sbConfigSaveBtn" class="btn btn-primary btn-sm" type="button">Save &amp; enable sharing</button>
            <span id="shareSetupMsg" class="share-msg"></span>
          </div>
        </div>
@@ -222,7 +222,7 @@ service cloud.firestore {
                   autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="10" />
            <button id="wsJoinBtn" class="btn btn-outline btn-sm" type="button">Join</button>
            <span id="shareIdleMsg" class="share-msg"></span>
-           <button id="fbReconfigBtn" class="btn btn-ghost btn-sm share-right" type="button" title="Change the Firebase configuration">⚙</button>
+           <button id="sbReconfigBtn" class="btn btn-ghost btn-sm share-right" type="button" title="Change the Supabase configuration">⚙</button>
          </div>
        </div>
 
@@ -304,9 +304,8 @@ service cloud.firestore {
   <script src="lib/pdf-lib.min.js"></script>
   <script src="lib/pdf.min.js"></script>
   <script src="lib/jszip.min.js"></script>
-  <!-- Firebase (compat builds, vendored) — powers the live shared workspace -->
-  <script src="lib/firebase-app-compat.js"></script>
-  <script src="lib/firebase-firestore-compat.js"></script>
+  <!-- Supabase client (vendored) — powers the live shared workspace -->
+  <script src="lib/supabase.js"></script>
   <script src="script.js"></script>
   <script src="sheet.js"></script>
   <script src="share.js"></script>
