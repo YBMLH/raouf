@@ -646,3 +646,4 @@ td:hover > .cell-toggle, .cell-toggle:focus-visible { opacity: 1; }
   .share-row { gap: 8px; }
   .share-code-input { flex: 1; min-width: 120px; }
 }
+.share-gear-hint { display: block; margin-top: 4px; color: var(--label-3); font-size: 12px; }

@@ -22,9 +22,20 @@
 (function () {
   "use strict";
 
-  const CONFIG_KEY = "bkr-sb-config";   // { url, key } pasted from Supabase (this browser)
+  const CONFIG_KEY = "bkr-sb-config";   // { url, key } — this browser's active Supabase project
   const ROOM_KEY    = "bkr-ws-code";    // workspace we're currently in
   const PUSH_DELAY  = 700;              // ms of quiet typing before we upload
+
+  // This app ships pre-connected to a Supabase project so nobody has to paste
+  // config to start sharing. The key here is the "publishable" (anon) key —
+  // it's meant to be public in client-side code; row-level security (set up
+  // by the one-time SQL in the setup panel) is what actually protects data.
+  // Reconfiguring (⚙ in the idle panel) overrides this with a different
+  // project, stored only in that browser.
+  const DEFAULT_CONFIG = {
+    url: "https://qqfaxjrsfzhykkpgxxgu.supabase.co",
+    key: "sb_publishable_b6wmhndH-Po0XOqyUi-MBA_QXbNoW-N",
+  };
 
   // A random id for this browser tab, so we can ignore our own echoes.
   const clientId = "c_" + Math.random().toString(36).slice(2, 10);
@@ -95,9 +106,9 @@
 
   function friendlyDbError(err) {
     const m = (err && (err.message || err.error_description || err.hint)) || "";
-    if (/relation .* does not exist/i.test(m)) return "The workspaces table doesn't exist yet — run the SQL from step 2.";
-    if (/permission denied|row-level security|RLS/i.test(m)) return "Blocked by row-level security — check the SQL policy from step 2.";
-    if (/JWT|Invalid API key|apikey/i.test(m)) return "Invalid Project URL or anon key — check step 3.";
+    if (/relation .* does not exist/i.test(m)) return "The workspaces table doesn't exist yet — tap ⚙ below and run the setup SQL once.";
+    if (/permission denied|row-level security|RLS/i.test(m)) return "Blocked by row-level security — tap ⚙ below and re-run the setup SQL.";
+    if (/JWT|Invalid API key|apikey/i.test(m)) return "Invalid Project URL or key — tap ⚙ below to check them.";
     return m || "Connection problem — retrying on next edit.";
   }
 
@@ -247,6 +258,12 @@
     // whole panel rather than show controls that can't work.
     $("sharePanel").hidden = true;
     return;
+  }
+  if (!store.get(CONFIG_KEY) && DEFAULT_CONFIG.url && DEFAULT_CONFIG.key) {
+    // First visit to this app: adopt the built-in project so sharing works
+    // with zero setup. Saved (not just held in memory) so the ⚙ panel shows
+    // these values if the user ever wants to point at a different project.
+    store.set(CONFIG_KEY, JSON.stringify(DEFAULT_CONFIG));
   }
   if (!store.get(CONFIG_KEY)) {
     show("setup");
